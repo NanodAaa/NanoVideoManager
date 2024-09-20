@@ -1,7 +1,27 @@
 import os
+import sys
 import shutil
+import subprocess
 
 # -------------------------- Functions ------------------------ #
+def get_ffmpeg_path():
+    """
+    Get the ffmpeg.exe path in the project.
+
+    Return: Absolute path of ffmpeg.exe in the project.
+    """
+    
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    if (sys.platform == 'win32'):   # windows
+        ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffmpeg.exe')
+        if (os.path.exists(ffmpeg_path)):
+            return ffmpeg_path
+        else:
+            print('Get ffmpeg path failed!')
+    
+    else: # linux
+        return os.path.join(base_path, 'ffmpeg', 'bin' , 'ffmpeg')
+
 def get_file_list(input_path):
     """ 
     Get the file list and save it to filelist.txt.
@@ -91,11 +111,28 @@ def generate_thumbnails(dir_path):
                 # 调用 ffmpeg 生成缩略图
                 input_path = os.path.join(dir_path, object)
                 print("input_path: " + input_path)
-                output_path = os.path.join(dir_path, 'out%02d.jpg')
+                if (os.path.exists(os.path.join(dir_path, os.path.splitext(object)[0])) == False):
+                    os.mkdir(os.path.join(dir_path, os.path.splitext(object)[0]))
+                output_path = os.path.join(dir_path, os.path.splitext(object)[0], 'out%02d.jpg')
                 # excute_cmd = 'ffmpeg -ss 3 -i input.mp4 -vf "select=gt(scene\,0.5)" -frames:v 5 -vsync vfr out%02d.jpg'
-                excute_cmd = 'ffmpeg -ss 3 -i ' + '"' + input_path + '"' + ' -vf select=gt(scene\,0.5) -frames:v 5 -vsync vfr ' + '"' + output_path + '"'
-                print("# excute_cmd: " + excute_cmd + '\n')
-                os.system(excute_cmd)
+                #print("# excute_cmd: " + excute_cmd + '\n')
+                #os.system(excute_cmd)
+                
+                ffmpeg_path = get_ffmpeg_path()
+                command = [ffmpeg_path, 
+                           '-ss', '3',
+                           '-i', input_path, 
+                           '-vf', 'select=gt(scene\,0.4)',
+                           '-frames:v', '20', 
+                           '-fps_mode', 'vfr',
+                           output_path]
+                try:
+                    # Call subprocess to run FFMPEG command.
+                    subprocess.run(command, check=True)
+                
+                except subprocess.CalledProcessError as e:
+                    print(f'ffmpeg process error: {e.returncode}')
+                
                 
             else:
                 pass
