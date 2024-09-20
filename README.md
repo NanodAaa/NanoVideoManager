@@ -1,5 +1,7 @@
 # GADGETS
 
+自用小工具库.
+
 ## ImgRotateTool
 
 - 批量将文件夹中图片旋转 90°.
