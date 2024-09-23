@@ -16,7 +16,7 @@
 - Deleting nfo files: 递归删除文件夹中所有 nfo 文件.
 
 ### Generate thumbnails:
-- 生成文件夹中视频的缩略图. 缩略图将会取视频中最有代表性的五个画面并按照 outputx.jpg 输出.
+- 生成文件夹中视频的缩略图. 缩略图将会取视频中最有代表性的20个画面并按照 outputx.jpg 输出在以视频文件命名的文件夹中.
 
 ## RGB565ToHEX
 - 将 RGB565 格式的图片转换为 HEX 格式并以 imagex.txt 文件输出.
