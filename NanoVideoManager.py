@@ -80,8 +80,6 @@ def merge_files(filelist_txt_path, output_path):
         `output_path`: the path of the output.mp4.
     """
     # excute_cmd = 'ffmpeg -f concat -safe 0 -i ' + '"' + filelist_txt_path + '"' + ' -c copy ' + '"' + output_path + '"'
-    # print("# excute_cmd: " + excute_cmd + '\n')
-    # os.system(excute_cmd)
     
     ffmpeg_path = get_ffmpeg_path()
     command = [
@@ -150,9 +148,9 @@ def menu_merge_videos():
         return -1
     
     else:
-        print ("# input_path: " + input_path)
-        print ("# output_path: " + input_path)
-        print('\n')
+        #print ("# input_path: " + input_path)          DEBUG
+        #print ("# output_path: " + input_path)         DEBUG
+        #print('\n')        DEBUG
         get_file_list(input_path)
 
         if(input("# Continue to merge files? (y/n): ").lower() == 'y'):
@@ -166,7 +164,7 @@ def menu_merge_videos():
 
 def menu_generate_thumb():
     """
-    
+    return: `0` if merge successfully. `-1` if failed.
     """
     input_path = input("# Please enter the path of the folder: ")
     if not os.path.exists(input_path):
