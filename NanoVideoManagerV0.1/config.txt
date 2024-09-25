@@ -1,2 +1,0 @@
-InputPath: E:\NanodAaa\VIDEO\PR_SAVE\INPUT\0113 DVR7
-OutputPath: E:\NanodAaa\VIDEO\PR_SAVE\INPUT\0113 DVR7

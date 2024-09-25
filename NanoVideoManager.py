@@ -23,7 +23,7 @@ def get_ffmpeg_path():
         return os.path.join(base_path, 'ffmpeg', 'bin' , 'ffmpeg')
 
 def get_file_list(input_path):
-    """ 
+    """
     Get the file list and save it to filelist.txt.
     
     Args:
@@ -67,9 +67,25 @@ def merge_files(filelist_txt_path, output_path):
         `filelist_txt_path`: the path of the filelist.txt.
         `output_path`: the path of the output.mp4.
     """
-    excute_cmd = 'ffmpeg -f concat -safe 0 -i ' + '"' + filelist_txt_path + '"' + ' -c copy ' + '"' + output_path + '"'
-    print("# excute_cmd: " + excute_cmd + '\n')
-    os.system(excute_cmd)
+    # excute_cmd = 'ffmpeg -f concat -safe 0 -i ' + '"' + filelist_txt_path + '"' + ' -c copy ' + '"' + output_path + '"'
+    # print("# excute_cmd: " + excute_cmd + '\n')
+    # os.system(excute_cmd)
+    
+    ffmpeg_path = get_ffmpeg_path()
+    command = [
+        ffmpeg_path,
+        '-f', 'concat',
+        '-safe', '0', 
+        '-i', filelist_txt_path,
+        '-c', 'copy',
+        output_path
+    ]
+    try:
+        subprocess.run(command, check=True)
+    
+    except subprocess.CalledProcessError as e:
+        print(f'ffmpeg process error! output:{e.returncode}')
+    
     
 def generate_folder(path):
     """ print('正在处理文件夹: ' + path) """
