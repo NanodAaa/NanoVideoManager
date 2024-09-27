@@ -8,11 +8,13 @@ class VideoManager:
     """
     INSTALL_PATH = ''
     FFMPEG_PATH = ''
+    FFPROBE_PATH = ''
     INPUT_PATH = ''
     VIDEO_LIST = []
     
     def __init__(self, input_path):
         self.FFMPEG_PATH = self.get_ffmpeg_path()
+        self.FFPROBE_PATH = self.get_ffprobe_path()
         self.INSTALL_PATH = os.path.dirname(os.path.abspath(__file__))
         self.INPUT_PATH = input_path
         self.VIDEO_LIST = self.get_video_list()
@@ -23,7 +25,6 @@ class VideoManager:
 
         Return: Absolute path of ffmpeg.exe in the project.
         """
-        
         base_path = os.path.dirname(os.path.abspath(__file__))
         if (sys.platform == 'win32'):   # windows
             ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffmpeg.exe')
@@ -31,6 +32,19 @@ class VideoManager:
                 return ffmpeg_path
             else:
                 print('Get ffmpeg path failed!')
+        
+        else: # linux
+            return os.path.join(base_path, 'ffmpeg', 'bin' , 'ffmpeg')
+        
+    def get_ffprobe_path(self):
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        if (sys.platform == 'win32'):   # windows
+            ffprobe_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffprobe.exe')
+            if (os.path.exists(ffprobe_path)):
+                return ffprobe_path
+            else:
+                print('Get ffprobe path failed!')
+                return -1
         
         else: # linux
             return os.path.join(base_path, 'ffmpeg', 'bin' , 'ffmpeg')
@@ -152,6 +166,7 @@ class VideoMerger(VideoManager):
         self.get_filelist_txt()
         command = [
             self.FFMPEG_PATH,
+            '-hide_banner',
             '-f', 'concat',
             '-safe', '0', 
             '-i', self.FILELIST_TXT_PATH,
@@ -274,6 +289,34 @@ class VideoSpilter(VideoManager):
         
         for video in self.VIDEO_LIST:
             
+            # Get video & audio bitrate.
+            command = [
+                self.FFPROBE_PATH,
+                '-v', 'error',
+                '-select_streams', 'v:0',
+                '-show_entries', 'stream=bit_rate',
+                '-of', 'default=noprint_wrappers=1:nokey=1',
+                video['abspath']
+            ]
+            
+            video_bitrate = subprocess.check_output(command).strip().decode('utf-8')
+            # print(video_bitrate)
+            
+            command = [
+                self.FFPROBE_PATH,
+                '-v', 'error',
+                '-select_streams', 'a:0',
+                '-show_entries', 'stream=bit_rate',
+                '-of', 'default=noprint_wrappers=1:nokey=1',
+                video['abspath']
+            ]
+            
+            audio_bitrate = subprocess.check_output(command).strip().decode('utf-8')
+            # print(audio_bitrate)
+            
+            video_size_persec = (int(video_bitrate) + int(audio_bitrate)) / 8
+            spilt_time = int((int(spilt_size) * 1000 * 1000) / (video_size_persec))
+            
             output_path = os.path.join(video['dirname'], os.path.splitext(video['basename'])[0])
             if not os.path.exists(output_path):
                 os.mkdir(output_path)
@@ -283,13 +326,14 @@ class VideoSpilter(VideoManager):
             command = [
                 self.FFMPEG_PATH,
                 '-i', video['abspath'],
-                '-fs', spilt_size,
                 '-c', 'copy',
+                '-f', 'segment', '-segment_time', f'{spilt_time}',
+                '-reset_timestamps', '1',
                 output_path
             ]
             
             try:
-                subprocess.run(command)
+                subprocess.run(command, check=True)
                 
             except subprocess.CalledProcessError as e:
                 print(f'Video spilt failed! Return code: {e.returncode}')

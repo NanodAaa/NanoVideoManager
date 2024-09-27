@@ -1,10 +1,7 @@
 # -------------------------- Nano Video Manager ------------------------ #
 # Author: NanodAaa 
 
-import sys
 import os
-import sys
-import subprocess
 import vm
 from enum import Enum, auto
 
@@ -104,14 +101,14 @@ def menu_format_transformer():
 def menu_video_spilter():
     """
     """
-    #input_path = input('Please input the path of video or folder to spilt: ')
-    input_path = r'E:\NanodAaa\VIDEO\OBS_OUTPUT\0112 DVR6\2024-01-12 15-10-03.mp4'
+    input_path = input('Please input the path of video or folder to spilt: ')
+    #input_path = r'E:\NanodAaa\VIDEO\OBS_OUTPUT\0112 DVR6\2024-01-12 15-10-03.mp4'
     if not os.path.exists(input_path):
         print('Path does not exist!')
         return -1
     
-    #spilt_size = input('Please input the maximum size for 1 output (XXM, XXG): ')
-    spilt_size = '1G'
+    spilt_size = input('Please input the maximum size for 1 output (XXM, XXG): ')
+    #spilt_size = '16000'
     tool = vm.VideoSpilter(input_path)
     
     tool.video_spilt(spilt_size)
@@ -130,8 +127,8 @@ print('\n')
 
 while 1:
     print(MenuDict)
-    #function = input("# Please select the functions you want to use: ")
-    function = '3'
+    function = input("# Please select the functions you want to use: ")
+    #function = '5'
 
     # Merge files
     if function == MenuDict.get('merge'):
