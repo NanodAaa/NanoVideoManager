@@ -264,4 +264,35 @@ class FormatTransformer(VideoManager):
                     print(f'{e.returncode}')
                     return -1
             
+class VideoSpilter(VideoManager):
+    """
+    """
+    def __init__(self, input_path):
+        super().__init__(input_path)
+        
+    def video_spilt(self, spilt_size):
+        
+        for video in self.VIDEO_LIST:
+            
+            output_path = os.path.join(video['dirname'], os.path.splitext(video['basename'])[0])
+            if not os.path.exists(output_path):
+                os.mkdir(output_path)
+                
+            output_path = os.path.join(output_path, 'output%02d.mp4')
+            
+            command = [
+                self.FFMPEG_PATH,
+                '-i', video['abspath'],
+                '-fs', spilt_size,
+                '-c', 'copy',
+                output_path
+            ]
+            
+            try:
+                subprocess.run(command)
+                
+            except subprocess.CalledProcessError as e:
+                print(f'Video spilt failed! Return code: {e.returncode}')
+                return -1
+            
         return
