@@ -1,22 +1,15 @@
-# GADGETS
+# NanoVideoManager
+自用视频处理小程序.  
+运行 NanoVideoManager.py  
+制作于 2024 09 27
 
-自用小工具库.
+## Video Merger:
+- 将文件夹中按默认顺序合并.
+- 默认为不重新编码
 
-## ImgRotateTool
+## Thumbnails Generator:
+- 生成单个或多个视频的缩略图.
+- 缩略图生成机制: 从视频中选取变化较大的 20 帧并输出.
 
-- 批量将文件夹中图片旋转 90°.
-
-
-## NanoVideoManager
-### Merge files: 
-- 将指定文件夹中的视频整合在一起.
-
-### JellyFin Manager:
-- Generate thumbnails: 待调试. 计划删除.
-- Deleting nfo files: 递归删除文件夹中所有 nfo 文件.
-
-### Generate thumbnails:
-- 生成文件夹中视频的缩略图. 缩略图将会取视频中最有代表性的20个画面并按照 outputx.jpg 输出在以视频文件命名的文件夹中.
-
-## RGB565ToHEX
-- 将 RGB565 格式的图片转换为 HEX 格式并以 imagex.txt 文件输出.
+## Format Transformer:
+- 改变视频格式, 可选择是否重新编码
