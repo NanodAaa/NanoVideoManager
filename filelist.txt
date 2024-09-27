@@ -1,2 +1,2 @@
-file 'D:\DOWNLOAD\CACHE_SPACE\thumb test\Grand Theft Auto V 2020 DVR.mp4'
-file 'D:\DOWNLOAD\CACHE_SPACE\thumb test\Grand Theft Auto V 2023 DVR.mp4'
+file 'E:\NanodAaa\VIDEO\OBS_OUTPUT\0111 DVR 5\5-2\2024-01-11 19-19-57.mp4'
+file 'E:\NanodAaa\VIDEO\OBS_OUTPUT\0111 DVR 5\5-2\2024-01-12 00-17-56.mp4'
