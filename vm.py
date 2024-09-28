@@ -211,7 +211,6 @@ class ThumbGenerator(VideoManager):
                             '-fps_mode', 'vfr',
                             output_path]
             try:
-                # Call subprocess to run FFMPEG command.
                 subprocess.run(command, check=True)
             
             except subprocess.CalledProcessError as e:
