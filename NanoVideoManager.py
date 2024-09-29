@@ -14,14 +14,12 @@ class MenuIndex(Enum):
     Enum for main menu function index.
     """
     merge = auto()
-    merge_recode = auto()
     generate_thumb = auto()
     format_transformer = auto()
     video_spliter = auto()
 
 # Main menu index dict
 MenuDict = {'merge': f'{MenuIndex.merge.value}',
-            'merge-recode' : f'{MenuIndex.merge_recode.value}',
             'generate-thumb' : f'{MenuIndex.generate_thumb.value}',
             'format-transformer' : f'{MenuIndex.format_transformer.value}',
             'video-spliter' : f'{MenuIndex.video_spliter.value}'
@@ -46,7 +44,7 @@ def menu_merge_videos():
         #print('\n')        DEBUG
         tool = vm.VideoMerger(input_path, os.path.dirname(__file__))
         
-        if(input("# Continue to merge files? (y/n): ").lower() == 'y'):
+        if(input("# Continue to merge files? (y/n): ").lower() in ('y', '')):
             print("# Merging files\n")
             ret = tool.merge_files()
         else:
@@ -54,12 +52,6 @@ def menu_merge_videos():
             return -1
         
     return ret
-
-def menu_merge_videos_recode():
-    """
-    Merge videos by recoding.
-    """
-    
 
 def menu_generate_thumb():
     """
@@ -133,13 +125,6 @@ while 1:
         print("# Merge files\n")
         ret = menu_merge_videos()
         if (ret):
-            continue
-
-    # Merge files Recode
-    if function == MenuDict['merge-recode']:
-        print('# Merge files recode\n')
-        ret = menu_merge_videos_recode()
-        if ret:
             continue
 
     # Generate thumbnails

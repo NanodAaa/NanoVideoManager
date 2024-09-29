@@ -1,6 +1,6 @@
-import sys
 import os
 import subprocess
+from enum import Enum, auto
 
 class VideoManager:
     """
@@ -90,7 +90,18 @@ class VideoMerger(VideoManager):
     """
     Merge video in the target folder.
     """
+    
+    class EncoderIndex(Enum):
+        libx264 = auto()
+        libx265 = auto()
+#        libsvtav1 = auto()
+    
     FILELIST_TXT_PATH = ''
+    ENCODER_DICT = {
+        f'{EncoderIndex.libx264.value}' : 'libx264',
+        f'{EncoderIndex.libx265.value}' : 'libx265',
+#        f'{EncoderIndex.libsvtav1.value}' : 'libsvtav1',
+    }
     
     def __init__(self, input_path, install_path):
         super().__init__(input_path, install_path)
@@ -138,9 +149,29 @@ class VideoMerger(VideoManager):
             '-f', 'concat',
             '-safe', '0', 
             '-i', self.FILELIST_TXT_PATH,
-            '-c', 'copy',
-            output_path
+        #    '-c', 'copy',
+        #    output_path
         ]
+        
+        if input('Wether you want to copy the videos (y/n): ').lower() in ('y', ''):
+            print('Encoder: copy')
+            command.append('-c')
+            command.append('copy')
+        else:
+            while True:
+                print(self.ENCODER_DICT)
+                command.append('-c:v')
+                encoder = input('Please select the encoder: ')
+                if encoder in self.ENCODER_DICT:
+                    command.append(self.ENCODER_DICT[encoder])
+                    break
+                elif encoder == '':
+                    command.append(self.ENCODER_DICT['1'])
+                    break
+                else:
+                    print('Input param does not exist!')
+        
+        command.append(output_path)
         try:
             subprocess.run(command, check=True)
         

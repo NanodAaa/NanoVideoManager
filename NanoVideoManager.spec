@@ -4,8 +4,8 @@
 a = Analysis(
     ['A:\\NanodAaa\\NanoVideoManager\\NanoVideoManager\\NanoVideoManager.py'],
     pathex=[],
-    binaries=[('ffmpeg.exe', 'ffmpeg'), ('ffprobe.exe', 'ffprobe')],
-    datas=[('filelist.txt', 'filelist')],
+    binaries=[('A:\\NanodAaa\\NanoVideoManager\\NanoVideoManager\\ffmpeg\\bin\\ffmpeg.exe', 'ffmpeg'), ('A:\\NanodAaa\\NanoVideoManager\\NanoVideoManager\\ffmpeg\\bin\\ffprobe.exe', 'ffprobe')],
+    datas=[('A:\\NanodAaa\\NanoVideoManager\\NanoVideoManager\\filelist.txt', 'filelist')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
