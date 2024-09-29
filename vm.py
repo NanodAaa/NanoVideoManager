@@ -153,23 +153,19 @@ class VideoMerger(VideoManager):
         #    output_path
         ]
         
-        if input('Wether you want to copy the videos (y/n): ').lower() in ('y', ''):
-            print('Encoder: copy')
-            command.append('-c')
-            command.append('copy')
-        else:
-            while True:
-                print(self.ENCODER_DICT)
+        while True:
+            print(self.ENCODER_DICT)
+            encoder = input('Please select the encoder (Empty=copy): ')
+            if encoder in self.ENCODER_DICT:
                 command.append('-c:v')
-                encoder = input('Please select the encoder: ')
-                if encoder in self.ENCODER_DICT:
-                    command.append(self.ENCODER_DICT[encoder])
-                    break
-                elif encoder == '':
-                    command.append(self.ENCODER_DICT['1'])
-                    break
-                else:
-                    print('Input param does not exist!')
+                command.append(self.ENCODER_DICT[encoder])
+                break
+            elif encoder == '':
+                command.append('-c')
+                command.append('copy')
+                break
+            else:
+                print('Input param does not exist!')
         
         command.append(output_path)
         try:
