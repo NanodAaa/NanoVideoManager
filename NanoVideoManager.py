@@ -84,9 +84,9 @@ def menu_format_transformer():
         return -1
     
     else:
-        output_format = input('Please input the output format (mp4, mkv, avi, flv): ')
+        # output_format = input('Please input the output format (mp4, mkv, avi, flv): ')
         
-        tool = vm.FormatTransformer(input_path, output_format, os.path.dirname(__file__))
+        tool = vm.FormatTransformer(input_path, os.path.dirname(__file__))
         tool.format_transform()
 
     return

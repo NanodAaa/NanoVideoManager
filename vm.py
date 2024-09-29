@@ -5,6 +5,42 @@ from enum import Enum, auto
 class VideoManager:
     """
     """
+    class EncoderIndex(Enum):
+        libx264 = auto()
+        libx265 = auto()
+        h264_nvenc = auto()
+        hevc_nvenc = auto()
+        h264_amf = auto()
+        hevc_amf = auto()
+        h264_vaapi = auto()
+#        libsvtav1 = auto()
+
+    ENCODER_DICT = {
+        f'{EncoderIndex.libx264.value}' : 'libx264',
+        f'{EncoderIndex.libx265.value}' : 'libx265',
+        f'{EncoderIndex.h264_nvenc.value}' : 'h264_nvenc',
+        f'{EncoderIndex.hevc_nvenc.value}' : 'hevc_nvenc',
+        f'{EncoderIndex.h264_amf.value}' : 'h264_amf',
+        f'{EncoderIndex.hevc_amf.value}' : 'hevc_amf',
+        f'{EncoderIndex.h264_vaapi.value}' : 'h264_vaapi',
+#        f'{EncoderIndex.libsvtav1.value}' : 'libsvtav1',
+    }
+    
+    class FormatIndex(Enum):
+        mp4 = auto()
+        mkv = auto()
+        flv = auto()
+        avi = auto()
+        mov = auto()
+    
+    FORMAT_DICT = {
+        f'{FormatIndex.mp4.value}' : '.mp4',
+        f'{FormatIndex.mkv.value}' : '.mkv',
+        f'{FormatIndex.flv.value}' : '.flv',
+        f'{FormatIndex.avi.value}' : '.avi',
+        f'{FormatIndex.mov.value}' : '.mov',
+    }
+    
     INSTALL_PATH = ''
     FFMPEG_PATH = ''
     FFPROBE_PATH = ''
@@ -85,23 +121,42 @@ class VideoManager:
             print(f"Filename: {video['basename']}, File abspath: {video['abspath']}")
             
         return video_list
+    
+    def get_video_bitrate(self, input_path):
+        """
+        Get video bitrate.
+        """
+        command = [
+                self.FFPROBE_PATH,
+                '-v', 'error',
+                '-select_streams', 'v:0',
+                '-show_entries', 'stream=bit_rate',
+                '-of', 'default=noprint_wrappers=1:nokey=1',
+                input_path,
+            ]   
+        video_bitrate = subprocess.check_output(command).strip().decode('utf-8')
+        return video_bitrate
+    
+    def get_audio_bitrate(self, input_path):
+        """
+        Get audio bitrate.
+        """
+        command = [
+                self.FFPROBE_PATH,
+                '-v', 'error',
+                '-select_streams', 'a:0',
+                '-show_entries', 'stream=bit_rate',
+                '-of', 'default=noprint_wrappers=1:nokey=1',
+                input_path,
+            ]
+        audio_bitrate = subprocess.check_output(command).strip().decode('utf-8')
+        return audio_bitrate
         
 class VideoMerger(VideoManager):
     """
     Merge video in the target folder.
     """
-    
-    class EncoderIndex(Enum):
-        libx264 = auto()
-        libx265 = auto()
-#        libsvtav1 = auto()
-    
     FILELIST_TXT_PATH = ''
-    ENCODER_DICT = {
-        f'{EncoderIndex.libx264.value}' : 'libx264',
-        f'{EncoderIndex.libx265.value}' : 'libx265',
-#        f'{EncoderIndex.libsvtav1.value}' : 'libsvtav1',
-    }
     
     def __init__(self, input_path, install_path):
         super().__init__(input_path, install_path)
@@ -217,23 +272,15 @@ class ThumbGenerator(VideoManager):
         return
             
 class FormatTransformer(VideoManager):
-    """
-    """
-    OUTPUT_FORMAT = ''
-    VALID_OUTPUT_FORMAT_TUPLE = ('mp4', 'mkv', 'avi', 'mov', 'flv')
-    
-    def __init__(self, input_path, output_format, install_path):
+    def __init__(self, input_path, install_path):
         super().__init__(input_path, install_path)
-        self.OUTPUT_FORMAT = output_format
         
-    def format_transform(self, input_path=None, output_format=None):
+    def format_transform(self, input_path=None):
         """
-        Transform video format.
+        Transform video format. 
         """
-        
         if not input_path == None:
-            video_list = self.get_video_list()
-            
+            video_list = self.get_video_list()       
         else:
             input_path = self.INPUT_PATH
             video_list = self.VIDEO_LIST
@@ -242,38 +289,48 @@ class FormatTransformer(VideoManager):
             print('File does not exist!')
             return -1
             
-        if output_format == None:
-            output_format = self.OUTPUT_FORMAT
+        while True:
+            print(self.ENCODER_DICT)
+            output_encoder = input('Please select a encoder(Empty == libx264): ')
+            if output_encoder in self.ENCODER_DICT:
+                output_encoder = self.ENCODER_DICT[output_encoder]
+                break
+            elif output_encoder == '':
+                output_encoder = 'copy'
+                break
+            else:
+                print('Input param error!')
+                continue
             
-        if not output_format in self.VALID_OUTPUT_FORMAT_TUPLE:
-            print('Output format is invalid!')
-            return -1
-        
-        recode_flag = False
-        if (input('Wether you want to recode the video? (y/n): ').lower == 'y'):
-            recode_flag = True
+        while True:
+            print(self.FORMAT_DICT)
+            output_format = input('Please select a format(Empty == .mp4): ')
+            if output_format in self.FORMAT_DICT:
+                output_format = self.FORMAT_DICT[output_format]
+                break
+            elif output_format == '':
+                output_format = '.mp4'
+                break
+            else:
+                print('Input param error!')
+                continue
             
-        else:
-            for video in video_list:
-                
-                command = [
-                    self.FFMPEG_PATH,
-                    '-i', video['abspath'],
-                ]
-                
-                if recode_flag == False:
-                    command.append('-c')
-                    command.append('copy')
+        for video in video_list:
+            output_path = os.path.join(video['dirname'], os.path.splitext(video['basename'])[0]) + output_format
+            command = [
+                self.FFMPEG_PATH,
+                '-i', video['abspath'],
+                '-c:v', output_encoder,
+                '-c:a', 'copy',
+                output_path,
+            ]
+            
+            try:
+                subprocess.run(command, check=True)
                     
-                output_path = os.path.join(video['dirname'], os.path.splitext(video['basename'])[0]) + f'.{output_format}'
-                command.append(output_path)
-                
-                try:
-                    subprocess.run(command, check=True)
-                    
-                except subprocess.CalledProcessError as e:
-                    print(f'{e.returncode}')
-                    return -1
+            except subprocess.CalledProcessError as e:
+                print(f'{e.returncode}')
+                return -1
             
 class VideoSpilter(VideoManager):
     """
