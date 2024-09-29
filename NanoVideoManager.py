@@ -65,7 +65,7 @@ def menu_generate_thumb():
         
     else:
         tool = vm.ThumbGenerator(input_path, os.path.dirname(__file__))
-        if(input("# Continue to generate thumbnails? (y/n): ").lower() == 'y'):
+        if(input("# Continue to generate thumbnails? (y/n): ").lower() in ('y', '')):
             print("# Generating thumbnails...\n")
             tool.generate_thumbnails()
             
