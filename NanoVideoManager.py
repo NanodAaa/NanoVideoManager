@@ -44,21 +44,22 @@ def menu_merge_videos():
         #print ("# input_path: " + input_path)          DEBUG
         #print ("# output_path: " + input_path)         DEBUG
         #print('\n')        DEBUG
-        tool = vm.VideoMerger(input_path)
+        tool = vm.VideoMerger(input_path, os.path.dirname(__file__))
         
         if(input("# Continue to merge files? (y/n): ").lower() == 'y'):
             print("# Merging files\n")
-            tool.merge_files()
+            ret = tool.merge_files()
         else:
             print("# Exiting...")
             return -1
         
-    return 0
+    return ret
 
 def menu_merge_videos_recode():
     """
     Merge videos by recoding.
     """
+    
 
 def menu_generate_thumb():
     """
@@ -71,7 +72,7 @@ def menu_generate_thumb():
         return -1
         
     else:
-        tool = vm.ThumbGenerator(input_path)
+        tool = vm.ThumbGenerator(input_path, os.path.dirname(__file__))
         if(input("# Continue to generate thumbnails? (y/n): ").lower() == 'y'):
             print("# Generating thumbnails...\n")
             tool.generate_thumbnails()
@@ -93,7 +94,7 @@ def menu_format_transformer():
     else:
         output_format = input('Please input the output format (mp4, mkv, avi, flv): ')
         
-        tool = vm.FormatTransformer(input_path, output_format)
+        tool = vm.FormatTransformer(input_path, output_format, os.path.dirname(__file__))
         tool.format_transform()
 
     return
@@ -109,12 +110,9 @@ def menu_video_spilter():
     
     spilt_size = input('Please input the maximum size for 1 output (XXM, XXG): ')
     #spilt_size = '16000'
-    tool = vm.VideoSpilter(input_path)
-    
+    tool = vm.VideoSpilter(input_path, os.path.dirname(__file__))
     tool.video_spilt(spilt_size)
     
-
-
 # -------------------------- Main -------------------------- #
 print('\n'*2)
 print('#' + '-'*100 + '#')
@@ -135,6 +133,13 @@ while 1:
         print("# Merge files\n")
         ret = menu_merge_videos()
         if (ret):
+            continue
+
+    # Merge files Recode
+    if function == MenuDict['merge-recode']:
+        print('# Merge files recode\n')
+        ret = menu_merge_videos_recode()
+        if ret:
             continue
 
     # Generate thumbnails

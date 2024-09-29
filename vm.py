@@ -1,6 +1,5 @@
 import sys
 import os
-import sys
 import subprocess
 
 class VideoManager:
@@ -12,42 +11,28 @@ class VideoManager:
     INPUT_PATH = ''
     VIDEO_LIST = []
     
-    def __init__(self, input_path):
+    def __init__(self, input_path, install_path):
+        self.INSTALL_PATH = install_path
         self.FFMPEG_PATH = self.get_ffmpeg_path()
         self.FFPROBE_PATH = self.get_ffprobe_path()
-        self.INSTALL_PATH = os.path.dirname(os.path.abspath(__file__))
         self.INPUT_PATH = input_path
         self.VIDEO_LIST = self.get_video_list()
     
     def get_ffmpeg_path(self):
         """
         Get the ffmpeg.exe path in the project.
-
-        Return: Absolute path of ffmpeg.exe in the project.
-        """
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        if (sys.platform == 'win32'):   # windows
-            ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffmpeg.exe')
-            if (os.path.exists(ffmpeg_path)):
-                return ffmpeg_path
-            else:
-                print('Get ffmpeg path failed!')
-        
-        else: # linux
-            return os.path.join(base_path, 'ffmpeg', 'bin' , 'ffmpeg')
+        """           
+        for root, dir, file in os.walk(self.INSTALL_PATH):
+            if 'ffmpeg.exe' in file:
+                return os.path.join(root, 'ffmpeg.exe')
         
     def get_ffprobe_path(self):
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        if (sys.platform == 'win32'):   # windows
-            ffprobe_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffprobe.exe')
-            if (os.path.exists(ffprobe_path)):
-                return ffprobe_path
-            else:
-                print('Get ffprobe path failed!')
-                return -1
-        
-        else: # linux
-            return os.path.join(base_path, 'ffmpeg', 'bin' , 'ffmpeg')
+        """
+        Get the ffprobe.exe path in the project.
+        """
+        for root, dir, file in os.walk(self.INSTALL_PATH):
+            if 'ffprobe.exe' in file:
+                return os.path.join(root, 'ffprobe.exe')
         
     def get_video_list(self, input_path=None):
         """ 
@@ -56,7 +41,7 @@ class VideoManager:
         Args:
             `input_path`: The path of the video or folder which contain the videos. Default = None.
         
-        Return:
+        Returns:
             `video_list`: List include video name, video abspath and other video info.
         """
         
@@ -66,32 +51,34 @@ class VideoManager:
             input_path = self.INPUT_PATH
             
         if os.path.isfile(input_path):
-            video_list = [
-                {
-                    'basename' : os.path.basename(input_path),
-                    'dirname' : os.path.split(input_path)[0],
-                    'format' : os.path.splitext(os.path.basename(input_path))[1],
-                    'abspath' : input_path
-                }
-            ]
-            return video_list
-        
-        fileslist = os.listdir(input_path)
-        for file in fileslist:
-            if (file.endswith(('mp4', 'mkv', 'avi', 'flv', 'mov'))) and (not file.startswith("output.mp4")):
-                basename = file
-                dirname = input_path
-                format = os.path.splitext(basename)[1]
-                abspath = os.path.join(input_path, file)
-                
-                video_list.append(
+            # If input_path is a video file.
+            if (input_path.endswith(('mp4', 'mkv', 'avi', 'flv', 'mov'))):
+                video_list = [
                     {
-                        'basename' : basename,
-                        'dirname' : dirname,
-                        'format' : format,
-                        'abspath' : abspath
+                        'basename' : os.path.basename(input_path),
+                        'dirname' : os.path.split(input_path)[0],
+                        'format' : os.path.splitext(os.path.basename(input_path))[1],
+                        'abspath' : input_path
                     }
-                )
+                ]
+        
+        else:
+            fileslist = os.listdir(input_path)
+            for file in fileslist:
+                if (file.endswith(('mp4', 'mkv', 'avi', 'flv', 'mov'))) and (not file.startswith("output.mp4")):
+                    basename = file
+                    dirname = input_path
+                    format = os.path.splitext(basename)[1]
+                    abspath = os.path.join(input_path, file)
+                    
+                    video_list.append(
+                        {
+                            'basename' : basename,
+                            'dirname' : dirname,
+                            'format' : format,
+                            'abspath' : abspath
+                        }
+                    )
                 
         print("# Video list: ")    
         for video in video_list:
@@ -99,40 +86,23 @@ class VideoManager:
             
         return video_list
         
-    def get_video_info(self):
-        """
-        Get video info: Frame rate, Resoulation, time...
-        
-        Args:
-            `input_path`: 
-        
-        Return:
-
-        """
-        
-        if not os.path.exists(self.INPUT_PATH):
-            print('Input path does not exist.')
-            return -1
-        
-        command = [
-            self.FFMPEG_PATH,
-            '-i', self.INPUT_PATH,
-            '-f', 'json',
-            '-hide_banner'
-        ]
-        
-        result = subprocess.run(command, stderr=subprocess.PIPE, universal_newlines=True)
-        
 class VideoMerger(VideoManager):
     """
-    
+    Merge video in the target folder.
     """
     FILELIST_TXT_PATH = ''
     
-    def __init__(self, input_path):
-        super().__init__(input_path)
-        self.FILELIST_TXT_PATH = os.path.join(self.INSTALL_PATH, "filelist.txt")
+    def __init__(self, input_path, install_path):
+        super().__init__(input_path, install_path)
+        self.FILELIST_TXT_PATH = self.get_filelist_txt_path()
         
+    def get_filelist_txt_path(self):
+        """
+        """
+        for root, dir, file in os.walk(self.INSTALL_PATH):
+            if 'filelist.txt' in file:
+                return os.path.join(root, 'filelist.txt')                
+    
     def get_filelist_txt(self):
         """
         Get the video list and save it to filelist.txt.
@@ -146,7 +116,7 @@ class VideoMerger(VideoManager):
             if (file.endswith(".mp4") or file.endswith(".mkv") or file.endswith(".avi") or file.endswith(".flv") or file.endswith(".wmv")) and (not file.startswith("output.mp4")):
                 filelist_txt.write("file '" + self.INPUT_PATH + '\\' + file + "'\n")
                 
-        print("# filelist.txt: ")
+        # print("# filelist.txt: ")
         # print(filelist_txt.read())
         filelist_txt.close()
         
@@ -158,8 +128,6 @@ class VideoMerger(VideoManager):
             `input_path`: the path of the folder which contain the videos to merge.
             `output_path`: the path of the output.mp4.
         """
-        # excute_cmd = 'ffmpeg -f concat -safe 0 -i ' + '"' + filelist_txt_path + '"' + ' -c copy ' + '"' + output_path + '"'
-        
         if (output_path == None):
             output_path = os.path.join(self.INPUT_PATH, "output.mp4")
         
@@ -178,14 +146,17 @@ class VideoMerger(VideoManager):
         
         except subprocess.CalledProcessError as e:
             print(f'ffmpeg process error! output:{e.returncode}')
+            return -1
+            
+        return 0
             
 class ThumbGenerator(VideoManager):
     """
     """
     CURRENT_PATH = ''
     
-    def __init__(self, input_path):
-        super().__init__(input_path)
+    def __init__(self, input_path, install_path):
+        super().__init__(input_path, install_path)
         self.CURRENT_PATH = self.INPUT_PATH
     
     def generate_thumbnails(self):
@@ -224,8 +195,8 @@ class FormatTransformer(VideoManager):
     OUTPUT_FORMAT = ''
     VALID_OUTPUT_FORMAT_TUPLE = ('mp4', 'mkv', 'avi', 'mov', 'flv')
     
-    def __init__(self, input_path, output_format):
-        super().__init__(input_path)
+    def __init__(self, input_path, output_format, install_path):
+        super().__init__(input_path, install_path)
         self.OUTPUT_FORMAT = output_format
         
     def format_transform(self, input_path=None, output_format=None):
@@ -267,8 +238,7 @@ class FormatTransformer(VideoManager):
                     command.append('-c')
                     command.append('copy')
                     
-                output_path = os.path.join(video['dirname'], 
-                                                os.path.splitext(video['basename'])[0]) + f'.{output_format}'
+                output_path = os.path.join(video['dirname'], os.path.splitext(video['basename'])[0]) + f'.{output_format}'
                 command.append(output_path)
                 
                 try:
@@ -281,8 +251,8 @@ class FormatTransformer(VideoManager):
 class VideoSpilter(VideoManager):
     """
     """
-    def __init__(self, input_path):
-        super().__init__(input_path)
+    def __init__(self, input_path, install_path):
+        super().__init__(input_path, install_path)
         
     def video_spilt(self, spilt_size):
         
