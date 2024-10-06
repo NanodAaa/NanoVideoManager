@@ -1,4 +1,4 @@
-('A:\\NanodAaa\\NanoVideoManager\\NanoVideoManager\\build\\NanoVideoManager\\PYZ-00.pyz',
+('E:\\NanodAaa\\WORK\\NanoVideoManager\\NanoVideoManager\\build\\NanoVideoManager\\PYZ-00.pyz',
  [('_compat_pickle',
    'C:\\Program '
    'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\\Lib\\_compat_pickle.py',
@@ -391,7 +391,9 @@
    'C:\\Program '
    'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\\Lib\\urllib\\parse.py',
    'PYMODULE'),
-  ('vm', 'A:\\NanodAaa\\NanoVideoManager\\NanoVideoManager\\vm.py', 'PYMODULE'),
+  ('vm',
+   'E:\\NanodAaa\\WORK\\NanoVideoManager\\NanoVideoManager\\vm.py',
+   'PYMODULE'),
   ('zipfile',
    'C:\\Program '
    'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\\Lib\\zipfile.py',
