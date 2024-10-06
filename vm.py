@@ -151,6 +151,43 @@ class VideoManager:
             ]
         audio_bitrate = subprocess.check_output(command).strip().decode('utf-8')
         return audio_bitrate
+    
+    def get_video_duration(self, input_path):
+        """
+        Get video duration.
+        
+        Args:
+            `input_path`: File to get duration.
+            
+        Returns:
+            `video_duration`: Video duration.
+        """
+        command =  [
+            self.FFPROBE_PATH,
+            "-v", "error",
+            "-select_streams", "v:0", 
+            "-show_entries", "format=duration", 
+            "-of", "default=noprint_wrappers=1:nokey=1", 
+            input_path
+        ]
+        
+        video_duration = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        return float(video_duration.stdout)
+    
+    def get_video_info(self, input_path):
+        VideoInfoDict = {
+            'video-duration' : self.get_video_duration(input_path),
+            'video-bitrate' : self.get_video_bitrate(input_path),
+            'audio-bitrate' : self.get_audio_bitrate(input_path),
+        }
+        
+        return VideoInfoDict
         
 class VideoMerger(VideoManager):
     """
@@ -235,6 +272,11 @@ class VideoMerger(VideoManager):
 class ThumbGenerator(VideoManager):
     """
     """
+    class AlgorithmIndex(Enum):
+        most_meaningful = auto()
+        frame = auto()
+        
+    THUMB_TOTAL_NUMS = 20
     CURRENT_PATH = ''
     
     def __init__(self, input_path, install_path):
@@ -254,20 +296,50 @@ class ThumbGenerator(VideoManager):
             if (os.path.exists(output_path) == False):
                 os.mkdir(output_path)
                 
-            output_path = os.path.join(output_path, 'out%02d.jpg')
+            """
+            Most-meaningful algorithm.
             
+            By d33pika. Asked Jan 18, 2013 at 8:35
+            https://superuser.com/questions/538112/meaningful-thumbnails-for-a-video-using-ffmpeg
+            """
+            """ output_path = os.path.join(output_path, 'out%02d.jpg')
             command = [self.FFMPEG_PATH, 
                             '-ss', '3',
                             '-i', video['abspath'], 
                             '-vf', 'select=gt(scene\,0.4)',
                             '-frames:v', '20', 
                             '-fps_mode', 'vfr',
-                            output_path]
-            try:
-                subprocess.run(command, check=True)
+                            output_path]  """
             
-            except subprocess.CalledProcessError as e:
-                print(f'ffmpeg process error: {e.returncode}')
+            """
+            Pseudo-code
+            for X in 1..N
+            T = integer( (X - 0.5) * D / N )  
+            run `ffmpeg -ss <T> -i <movie>
+                        -vf select="eq(pict_type\,I)" -vframes 1 image<X>.jpg`
+            
+            T - time point for tumbnail
+            
+            By gertas. Answered Oct 6, 2014 at 20:21. 
+            https://superuser.com/questions/538112/meaningful-thumbnails-for-a-video-using-ffmpeg
+            """
+            video_duration = self.get_video_duration(video['abspath'])
+            for X in range(1, self.THUMB_TOTAL_NUMS):
+                output_path_num = os.path.join(output_path, f'output{X-1}.jpg')
+                T = int((X - 0.5) * video_duration / self.THUMB_TOTAL_NUMS)
+                command = [
+                    self.FFMPEG_PATH,
+                    '-y',
+                    '-ss', f'{T}',
+                    '-i', video['abspath'],
+                    '-vf', 'select=eq(pict_type\,I)',
+                    '-vframes', '1',
+                    output_path_num
+                ]
+                
+                result = subprocess.run(command, check=False)
+                if result.returncode != 0:
+                    print(f"Error processing {video['abspath']}. Skipping to next file.")
                 
         return
             
