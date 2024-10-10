@@ -276,7 +276,7 @@ class ThumbGenerator(VideoManager):
         most_meaningful = auto()
         frame = auto()
         
-    THUMB_TOTAL_NUMS = 20
+    THUMB_TOTAL_NUMS = 0
     CURRENT_PATH = ''
     
     def __init__(self, input_path, install_path):
@@ -290,7 +290,7 @@ class ThumbGenerator(VideoManager):
         Args:
             `dir_path`: the path of the input folder.
         """
-
+        self.THUMB_TOTAL_NUMS = int(input('Please input the number of thumbs to generate: '))
         for video in self.VIDEO_LIST:
             output_path = os.path.join(video['dirname'], os.path.splitext(video['basename'])[0])
             if (os.path.exists(output_path) == False):
@@ -324,7 +324,7 @@ class ThumbGenerator(VideoManager):
             https://superuser.com/questions/538112/meaningful-thumbnails-for-a-video-using-ffmpeg
             """
             video_duration = self.get_video_duration(video['abspath'])
-            for X in range(1, self.THUMB_TOTAL_NUMS):
+            for X in range(1, self.THUMB_TOTAL_NUMS + 1):
                 output_path_num = os.path.join(output_path, f'output{X-1}.jpg')
                 T = int((X - 0.5) * video_duration / self.THUMB_TOTAL_NUMS)
                 command = [
