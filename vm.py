@@ -274,9 +274,13 @@ class ThumbGenerator(VideoManager):
     """
     class AlgorithmIndex(Enum):
         most_meaningful = auto()
-        frame = auto()
+        avg_frametime = auto()
         
-    THUMB_TOTAL_NUMS = 0
+    GENERATE_ALGORITHM_DICT = {
+        'most-meaningful' : f'{AlgorithmIndex.most_meaningful.value}',
+        'avg-frametime' : f'{AlgorithmIndex.avg_frametime.value}',
+    }
+    
     CURRENT_PATH = ''
     
     def __init__(self, input_path, install_path):
@@ -290,56 +294,72 @@ class ThumbGenerator(VideoManager):
         Args:
             `dir_path`: the path of the input folder.
         """
-        self.THUMB_TOTAL_NUMS = int(input('Please input the number of thumbs to generate: '))
+        
+        print(self.GENERATE_ALGORITHM_DICT)
+        generate_algorithm = input('Please select the algorithm of generation: ')
+        thumb_total_nums = int(input('Please input the number of thumbs to generate: '))
         for video in self.VIDEO_LIST:
             output_path = os.path.join(video['dirname'], os.path.splitext(video['basename'])[0])
             if (os.path.exists(output_path) == False):
                 os.mkdir(output_path)
                 
-            """
-            Most-meaningful algorithm.
-            
-            By d33pika. Asked Jan 18, 2013 at 8:35
-            https://superuser.com/questions/538112/meaningful-thumbnails-for-a-video-using-ffmpeg
-            """
-            """ output_path = os.path.join(output_path, 'out%02d.jpg')
-            command = [self.FFMPEG_PATH, 
-                            '-ss', '3',
-                            '-i', video['abspath'], 
-                            '-vf', 'select=gt(scene\,0.4)',
-                            '-frames:v', '20', 
-                            '-fps_mode', 'vfr',
-                            output_path]  """
-            
-            """
-            Pseudo-code
-            for X in 1..N
-            T = integer( (X - 0.5) * D / N )  
-            run `ffmpeg -ss <T> -i <movie>
-                        -vf select="eq(pict_type\,I)" -vframes 1 image<X>.jpg`
-            
-            T - time point for tumbnail
-            
-            By gertas. Answered Oct 6, 2014 at 20:21. 
-            https://superuser.com/questions/538112/meaningful-thumbnails-for-a-video-using-ffmpeg
-            """
-            video_duration = self.get_video_duration(video['abspath'])
-            for X in range(1, self.THUMB_TOTAL_NUMS + 1):
-                output_path_num = os.path.join(output_path, f'output{X-1}.jpg')
-                T = int((X - 0.5) * video_duration / self.THUMB_TOTAL_NUMS)
-                command = [
-                    self.FFMPEG_PATH,
-                    '-y',
-                    '-ss', f'{T}',
-                    '-i', video['abspath'],
-                    '-vf', 'select=eq(pict_type\,I)',
-                    '-vframes', '1',
-                    output_path_num
-                ]
+            if generate_algorithm == self.GENERATE_ALGORITHM_DICT['most-meaningful']:
+                """
+                Most-meaningful algorithm.
+                
+                By d33pika. Asked Jan 18, 2013 at 8:35
+                https://superuser.com/questions/538112/meaningful-thumbnails-for-a-video-using-ffmpeg
+                """
+                output_path = os.path.join(output_path, 'out%02d.jpg')
+                command = [self.FFMPEG_PATH, 
+                                '-y',
+                                '-ss', '3',
+                                '-i', video['abspath'], 
+                                '-vf', 'select=gt(scene\,0.4)',
+                                '-frames:v', '20', 
+                                '-fps_mode', 'vfr',
+                                output_path] 
                 
                 result = subprocess.run(command, check=False)
                 if result.returncode != 0:
                     print(f"Error processing {video['abspath']}. Skipping to next file.")
+                                
+            elif generate_algorithm == self.GENERATE_ALGORITHM_DICT['avg-frametime']:                                       
+                """
+                Avg frame time algorithm.
+                
+                Pseudo-code
+                for X in 1..N
+                T = integer( (X - 0.5) * D / N )  
+                run `ffmpeg -ss <T> -i <movie>
+                            -vf select="eq(pict_type\,I)" -vframes 1 image<X>.jpg`
+                
+                T - time point for tumbnail
+                
+                By gertas. Answered Oct 6, 2014 at 20:21. 
+                https://superuser.com/questions/538112/meaningful-thumbnails-for-a-video-using-ffmpeg
+                """
+                video_duration = self.get_video_duration(video['abspath'])
+                for X in range(1, thumb_total_nums + 1):
+                    output_path_num = os.path.join(output_path, f'output{X-1}.jpg')
+                    T = int((X - 0.5) * video_duration / thumb_total_nums)
+                    command = [
+                        self.FFMPEG_PATH,
+                        '-y',
+                        '-ss', f'{T}',
+                        '-i', video['abspath'],
+                        '-vf', 'select=eq(pict_type\,I)',
+                        '-vframes', '1',
+                        output_path_num
+                    ]
+                    
+                    result = subprocess.run(command, check=False)
+                    if result.returncode != 0:
+                        print(f"Error processing {video['abspath']}. Skipping to next file.")
+            
+            else:
+                print('Algorithm does not exists!')
+                return -1
                 
         return
             
